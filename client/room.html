@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatroom</title>
+    <style>
+        p {
+            text-align: left;
+            padding-left: 30px;
+        }
+    </style>
+</head>
+<body>
+<div style="text-align: center">Chatroom</div>
+<div>
+    <button id="displaysign" onclick="start()"> 登录</button>
+    <button id="register" onclick="gotoregist()"> 注册</button>
+</div>
+<div id="signform" style="display: none">
+    <div>
+        <button id="close" onclick="signclose()"> close</button>
+    </div>
+    <div>
+        <input id="user" type="text" placeholder="username"  name="username">
+    </div>
+    <div>
+        <input id="pwd" type="password" placeholder="pwd"  name="password">
+    </div>
+    <div>
+        <button onclick="login()"> login</button>
+    </div>
+
+</div>
+<div style="width: 800px;height: 600px;margin: 30px auto;text-align: center">
+    <div style="width: 800px;border: 1px solid gray;height: 300px;">
+        <div style="width: 200px;height: 300px;float: left;text-align: left;">
+            <p><span>当前在线:</span><span id="user_num">0</span></p>
+            <div id="user_list" style="overflow: auto;">
+            </div>
+        </div>
+        <div id="msg_list" style="width: 598px;border:  1px solid gray; height: 300px;overflow: scroll;float: left;">
+        </div>
+    </div>
+    <br>
+    <textarea id="msg_box" rows="6" cols="50" onkeydown="confirm(event)"></textarea><br>
+    <input type="button" value="发送" onclick="send()">
+</div>
+
+</body>
+</html>
+<script type="text/javascript">
+    var ws = new WebSocket("ws://127.0.0.1:8888/ws");
+    function confirm(event) {
+        var key_num = event.keyCode;
+        if (13 == key_num) {
+            send();
+        } else {
+            return false;
+        }
+    }
+
+    ws.onopen = function () {
+        var data = "系统消息：建立连接成功";
+        listMsg(data);
+    };
+
+    ws.onmessage = function (e){
+        var msg=JSON.parse(e.data)
+        console.log(msg.Code)
+        switch (msg.Type){
+            case "LoginReply":
+                if (msg.Code == 200){
+                            alert("success")
+                            var username = document.getElementById("user").value;
+                            var password = document.getElementById("pwd").value;
+                            localStorage.username = username;
+                            localStorage.password = password;
+                            listMsg(username+":"+"loginsucess")
+                }
+            case "Response":
+                    listMsg(msg.Data)
+            default:
+                console.log(msg.Type)
+        }
+    };
+
+    function start(){
+        document.getElementById('signform').style.display=""
+    }
+    function signclose(){
+        document.getElementById('signform').style.display="none"
+    }
+
+    function send(){
+        var msg_box = document.getElementById("msg_box");
+        var content = msg_box.value;
+        var reg = new RegExp("\r\n", "g");
+        content = content.replace(reg, "");
+        var msg = {'UserName':localStorage.username,'content': content.trim()};
+        var m=JSON.stringify(msg)
+        var data ={'user':localStorage.username,'type':'CommonMsg',content:m}
+        sendMsg(data);
+        msg_box.value = '';
+    }
+
+    function sendMsg(msg) {
+        var data = JSON.stringify(msg);
+        ws.send(data);
+    }
+
+    function listMsg(data) {
+        var msg_list = document.getElementById("msg_list");
+        var msg = document.createElement("p");
+        msg.innerHTML = data;
+        msg_list.appendChild(msg);
+        msg_list.scrollTop = msg_list.scrollHeight;
+    }
+    function login(){
+        var username = document.getElementById('user').value;
+        var password = document.getElementById('pwd').value;
+        // 用户名和密码都不为空
+        if(username&&password){
+            var user_info={
+                'UserName':username,
+                'Password':password,
+            }
+            info=JSON.stringify(user_info)
+            var data = {'User': 'regtest', 'Type': 'Login','Content':info};
+            d=JSON.stringify(data)
+            ws.send(d)
+        }
+    }
+    function gotoregist(){
+        var returnUrl = "returnUrl=room.html";
+        var Url = "reg.html" + "?" + returnUrl;
+        location.href = Url;
+    }
+
+</script>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <META http-equiv="Content-Type" content="text/html; charset=gb2312">
+  <title >GoLang chat room</title>
+</head >
+<body>
+<h3>GoLang chat room</h3>
+<form>
+  <table>
+    <tr>
+      <td align="right">用户名:</td>
+      <td><input type="text" id="uname"/></td>
+    </tr>
+    <tr>
+      <td align="right">创建密码:</td>
+      <td><input type="password" id="pwd"/></td>
+    </tr>
+    <tr>
+      <td align="right">确认密码:</td>
+      <td><input type="password" id="pwdcfm"/></td>
+    </tr>
+    <tr>
+      <td align="right"> <input type="button" value="发送" onclick="regist()"></td>
+    </tr>
+  </table >
+</form>
+</body>
+</html>
+<script type="text/javascript">
+  var ws = new WebSocket("ws://127.0.0.1:8888/ws");
+  function regist() {
+    var username = document.getElementById("uname").value;
+    var password = document.getElementById("pwd").value;
+    var passwordcfm = document.getElementById("pwdcfm").value;
+    if (password==passwordcfm){
+      var user_info={
+        'UserName':username,
+        'Password':password,
+      }
+    }
+    info=JSON.stringify(user_info)
+    var data = {'User': 'regtest', 'Type': 'Register','Content':info};
+    d=JSON.stringify(data)
+    ws.send(d)
+  }
+
+  ws.onmessage = function (e){
+    var Msg=JSON.parse(e.data)
+    console.log(Msg.Type)
+    switch (Msg.Type){
+      case "Response":
+        if (Msg.Code == 200){
+          alert("success")
+          var username = document.getElementById("uname").value;
+          var password = document.getElementById("pwd").value;
+          localStorage.username = username;
+          localStorage.password = password;
+          var url = location.search.split("=")[1];
+          location.href = url; //从地址栏获取返回地址，实现跳转
+        }
+      default:
+        listMsg(Msg.Type)
+    }
+  };
+</script>
