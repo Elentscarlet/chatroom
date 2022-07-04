@@ -1,3 +1,3 @@
-# chatroom
-# 基于WebSocket开发的聊天室应用
-# 使用redis存储数据
+chatroom
+
+基于WebSocket开发的聊天室应用，使用 redis 来保存用户的注册信息
