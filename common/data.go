@@ -21,7 +21,6 @@ const (
 )
 
 type Data struct {
-	User    string `json:"user"`
 	Type    string `json:"type"`
 	Content string `json:"content"`
 }

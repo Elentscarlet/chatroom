@@ -76,6 +76,8 @@
                             localStorage.username = username;
                             localStorage.password = password;
                             listMsg(username+":"+"loginsucess")
+                }else if(msg.Code ==403){
+                    alert("login failed")
                 }
             case "Response":
                     listMsg(msg.Data)

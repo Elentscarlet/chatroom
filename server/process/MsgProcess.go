@@ -26,9 +26,6 @@ func SendMsg(msg common.Data) (err error) {
 	}
 	for _, info := range model.ClientMap {
 		fmt.Println(info.UserName)
-		if sourceUser == info.UserName {
-			continue
-		}
 		write(data, info.Conn)
 	}
 	return
